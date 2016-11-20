@@ -7,8 +7,8 @@ class Room
 {
     public:
         Room();
+        bool exit;
         std::map<std::string, std::string> border_map;
-        Room * n, *s, *e, *w;
         std::string name, description;
         virtual ~Room();
     protected:

@@ -35,7 +35,7 @@ int main()
     xml_node<> * mapNode, *lvl_node;
     std::list<Room> rooms;
     Room temp_room;
-    std::string name, value;
+    std::string name, value, ex;
 
     std::ifstream t(file_name.c_str());
     std::string strr((std::istreambuf_iterator<char>(t)),
@@ -67,7 +67,12 @@ int main()
                 if (!value.compare("border")){
                     setBorder(lvl_node, &temp_room );
                 }
-
+                if (!value.compare("type")){
+                    ex = lvl_node->value();
+                    if(!ex.compare("exit")){
+                        temp_room.exit = true;
+                    }
+                }
                 lvl_node = lvl_node->next_sibling();
             }
             rooms.push_back(temp_room);
@@ -76,7 +81,8 @@ int main()
     }
 
     GameManager game_manager = GameManager(rooms);
-    game_manager.print_rooms();
+    //game_manager.print_rooms();
+    game_manager.start();
 
 // TODO: 2nd pass to actually add instances of items/containers
 
