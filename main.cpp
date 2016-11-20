@@ -10,6 +10,7 @@
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
 #include "Room.h"
+#include "GameManager.h"
 
 //using namespace std;
 using namespace rapidxml;
@@ -74,22 +75,10 @@ int main()
         mapNode = mapNode->next_sibling(); // move ptr
     }
 
-// TODO: 2nd pass to actually add instances of items/containers
+    GameManager game_manager = GameManager(rooms);
+    game_manager.print_rooms();
 
-    // PRINT OUT THE ROOM's CONTENTS!
-    for (std::list<Room>::iterator it=rooms.begin();it != rooms.end(); it++){
-        if (!it->name.empty()){
-            std::cout << "Name:: " << it->name << std::endl;
-        }
-        if (!it->description.empty()){
-            std::cout << "\tDescription:: " << it->description << std::endl;
-        }
-        std::cout << "\tBorders::" << std::endl;
-        std::cout << "\t\tn:: " << it->border_map["n"] << std::endl;
-        std::cout << "\t\ts:: " << it->border_map["s"] << std::endl;
-        std::cout << "\t\te:: " << it->border_map["e"] << std::endl;
-        std::cout << "\t\tw:: " << it->border_map["w"] << std::endl;
-    }
+// TODO: 2nd pass to actually add instances of items/containers
 
 
     return 0;
