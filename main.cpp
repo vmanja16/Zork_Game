@@ -11,6 +11,7 @@
 #include "rapidxml_utils.hpp"
 #include "Room.h"
 #include "GameManager.h"
+#include "Item.h"
 
 //using namespace std;
 using namespace rapidxml;
@@ -66,6 +67,9 @@ int main()
                 }
                 if (!value.compare("border")){
                     setBorder(lvl_node, &temp_room );
+                }
+                if (!value.compare("status")){
+                    temp_room.status = lvl_node->value();
                 }
                 if (!value.compare("type")){
                     ex = lvl_node->value();

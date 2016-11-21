@@ -3,13 +3,13 @@
 #include <iostream>
 #include <string>
 #include <map>
-class Room
+#include "GameObject.h"
+class Room: public GameObject
 {
     public:
         Room();
         bool exit;
         std::map<std::string, std::string> border_map;
-        std::string name, description;
         virtual ~Room();
     protected:
     private:

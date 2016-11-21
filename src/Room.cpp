@@ -4,8 +4,6 @@
 
 Room::Room()
 {
-    //name;
-    //description;
     border_map["s"] = "";
     border_map["s"] = "";
     border_map["w"] = "";
