@@ -2,7 +2,7 @@
 
 Item::Item()
 {
-    //ctor
+    is_item = true;
 }
 
 Item::~Item()

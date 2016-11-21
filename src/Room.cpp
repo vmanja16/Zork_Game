@@ -9,6 +9,7 @@ Room::Room()
     border_map["w"] = "";
     border_map["e"] = "";
     exit = false;
+    is_room = true;
 }
 
 Room::~Room()
