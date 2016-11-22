@@ -6,6 +6,7 @@
 class GameManager
 {
     public:
+        bool game_exit;
         std::list<Room> rooms; //!< Member variable "rooms"
         Room * current_room;
         std::list<std::string> commands;

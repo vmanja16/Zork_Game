@@ -4,7 +4,8 @@ GameManager::GameManager(std::list<Room> room_list){
     GameManager::Setrooms(room_list);
     current_room = NULL;
     dirs.push_back("n");dirs.push_back("e");dirs.push_back("s");dirs.push_back("w");
-    commands.insert(commands.end(), dirs.begin(), dirs.end());
+    commands.insert(commands.end(), dirs.begin(), dirs.end()); commands.push_back("open exit");
+    game_exit = false;
 }
 
 GameManager::~GameManager(){
@@ -44,9 +45,21 @@ std::string GameManager::getCommand(){
 }
 
 void GameManager::parseCommand(std::string cmd){
+    // GameManager::checkTriggers(cmd);
     if (std::find(dirs.begin(), dirs.end(), cmd) != dirs.end()){
         goDirection(cmd);
     }
+    if(!cmd.compare("open exit")){
+        if(current_room->exit){
+            game_exit = true;
+        }
+
+    }
+    //if(!cmd.compare())
+    // i,take(item),open(container),
+    //open exit, read (item)
+    //drop(item), put(item) in (container)
+    // turnon (item), attack (creature) with (item)
     // open and other commands
 }
 
@@ -63,10 +76,11 @@ void GameManager::start(){
 
 void GameManager::loopGame(){
     std::string cmd;
-    while(current_room->exit == false){
+    while(!game_exit){
         cmd = getCommand();
         parseCommand(cmd);
     }
+    std::cout << "Game Over" << std::endl;
 }
 
 void GameManager::print_rooms(){
