@@ -14,9 +14,9 @@
 #include "Item.h"
 
 using namespace rapidxml;
-std::string file_name = "itemsample.xml";
+//std::string file_name = "itemsample.xml";
 //std::string file_name = "roomsample.xml";
-//std::string file_name = "sample.txt.xml";
+std::string file_name = "sample.txt.xml";
 void setBorder(xml_node<> * lvl_node, Room * room){
     xml_node<> * node = lvl_node->first_node(); //dir or name
     std::string name, value, dir, border_name;
@@ -143,6 +143,8 @@ int main()
 
     // START GAME
     GameManager game_manager = GameManager(rooms);
+    game_manager.Setitem_instances(items);
+    game_manager.Setitem_map(item_map);
     //game_manager.print_rooms();
 /*
     for (std::list<Item>::iterator it=items.begin();it != items.end(); it++){

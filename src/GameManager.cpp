@@ -1,11 +1,22 @@
 #include "GameManager.h"
+#include "string.h"
+#include <vector>
+#include <string>
+#include <sstream>
+
 
 GameManager::GameManager(std::list<Room> room_list){
+    // TODO: NEED TO GET THE ITEM_INSTANCE LIST!
     GameManager::Setrooms(room_list);
     current_room = NULL;
     dirs.push_back("n");dirs.push_back("e");dirs.push_back("s");dirs.push_back("w");
-    commands.insert(commands.end(), dirs.begin(), dirs.end()); commands.push_back("open exit");
+    ///commands.insert(commands.end(), dirs.begin(), dirs.end());
+    commands.push_back("open exit");
+    commands.push_back("open"); commands.push_back("put"); commands.push_back("take");
+    commands.push_back("i"); commands.push_back("drop"); commands.push_back("read");
     game_exit = false;
+    inventory = Room();
+    inventory.Setname("inventory");
 }
 
 GameManager::~GameManager(){
@@ -31,7 +42,13 @@ void GameManager::enterRoom(std::string room_name){
 }
 
 bool GameManager::checkCommandValid(std::string cmd){
-    return (std::find(commands.begin(), commands.end(), cmd) != commands.end());
+    std::string command = cmd;
+    std::vector<std::string> cmd_split;
+    std::istringstream iss(cmd);
+    for(std::string cmd; iss >> cmd;){cmd_split.push_back(cmd);}
+    if(cmd_split.empty()){return false;}
+    if(std::find(dirs.begin(), dirs.end(), command) != dirs.end()){return true;}
+    return (std::find(commands.begin(), commands.end(), cmd_split[0]) != commands.end());
 }
 
 std::string GameManager::getCommand(){
@@ -45,22 +62,109 @@ std::string GameManager::getCommand(){
 }
 
 void GameManager::parseCommand(std::string cmd){
-    // GameManager::checkTriggers(cmd);
-    if (std::find(dirs.begin(), dirs.end(), cmd) != dirs.end()){
-        goDirection(cmd);
-    }
-    if(!cmd.compare("open exit")){
-        if(current_room->exit){
-            game_exit = true;
-        }
+    std::string command = cmd;
+    std::vector<std::string> cmd_split;
+    std::istringstream iss(cmd);
+    for(std::string cmd; iss >> cmd;){cmd_split.push_back(cmd);}
+    std::string cmd_0 = cmd_split[0];
+    // GameManager::checkTriggers(command){return if triggered};
+    if (std::find(dirs.begin(), dirs.end(), command) != dirs.end()){goDirection(command);}
+    if(!cmd_0.compare("take")){take(cmd_split);}
+    if(!cmd_0.compare("drop")){drop(cmd_split);}
+    if(!cmd_0.compare("i")){printInventory();}
+    if(!cmd_0.compare("read")){read(cmd_split);}
+    if(!command.compare("open exit")){if(current_room->exit){game_exit = true;}else{std::cout<<"Error"<<std::endl;}}
 
-    }
-    //if(!cmd.compare())
-    // i,take(item),open(container),
+    // n,w,s,e,i,
+    //take(item),
+    //open(container),
     //open exit, read (item)
     //drop(item), put(item) in (container)
     // turnon (item), attack (creature) with (item)
     // open and other commands
+}
+
+void GameManager::read(std::vector<std::string> cmd_list){
+    bool read = false;
+    if(cmd_list.size() <=1){
+        std::cout << "Read what?" << std::endl;
+    }
+    else{
+        for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+            if(!it->Getname().compare(cmd_list[1])){
+                if(it->Getowner()==NULL){continue;}
+                if(!it->Getowner()->Getname().compare("inventory")){
+                    if(!it->Getwriting().empty()){
+                        std::cout << it->Getwriting() << std::endl;
+                    }
+                    else{std::cout << "Nothing written" << std::endl;}
+                    read= true; break;
+               }
+            }
+        }
+        if(!read){std::cout << "Error: Item " << cmd_list[1] << " is not in inventory." << std::endl;}
+    }
+}
+
+void GameManager::drop(std::vector<std::string> cmd_list){
+    bool dropped = false;
+    if(cmd_list.size() <=1){
+        std::cout << "Drop what?" << std::endl;
+    }
+    else{
+        for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+            if(!it->Getname().compare(cmd_list[1])){
+                if(it->Getowner()==NULL){continue;}
+                if(!it->Getowner()->Getname().compare("inventory")){
+                    it->Setowner(current_room);
+                    dropped = true; break;
+               }
+            }
+        }
+        if(dropped){std::cout << "Item " << cmd_list[1] << " dropped" << std::endl;}
+        else{std::cout << "Error: Item " << cmd_list[1] << " is not in inventory." << std::endl;}
+    }
+}
+
+void GameManager::take(std::vector<std::string> cmd_list){
+    bool taken = false;
+    if(cmd_list.size() <=1){
+        std::cout << "Take what?" << std::endl;
+    }
+    else{
+        for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+
+            if(!it->Getname().compare(cmd_list[1])){
+                if(it->Getowner()==NULL){continue;}
+                if(!it->Getowner()->Getname().compare(current_room->Getname())){
+                    it->Setowner(&inventory);
+                    taken = true; break;
+               }
+            }
+        }
+        if(taken){std::cout << "Item " << cmd_list[1] <<
+            " added to inventory." << std::endl;
+        }
+        else{std::cout << "Error" << std::endl;}
+    }
+}
+
+void GameManager::printInventory(){
+    std::cout << "Inventory: ";
+    bool has_items = false;
+    for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+        if(it->Getowner()==&inventory){
+            if (!has_items){
+                std::cout << it->Getname();
+                has_items = true;
+            }
+            else{
+                std::cout <<", " << it->Getname();
+            }
+        }
+    }
+    if(!has_items){std::cout << "empty";}
+    std::cout << std::endl;
 }
 
 void GameManager::goDirection(std::string dir){
@@ -68,6 +172,10 @@ void GameManager::goDirection(std::string dir){
     if (!room_name.empty()){enterRoom(room_name);}
     else{std::cout << "Can't go there!" << std::endl;}
 }
+
+/**
+    GAME CONTROL
+*/
 
 void GameManager::start(){
     enterRoom("Entrance");

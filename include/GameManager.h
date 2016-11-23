@@ -2,10 +2,26 @@
 #define GAMEMANAGER_H
 #include <list>
 #include "Room.h"
+#include "Item.h"
 #include <algorithm>
+#include <map>
+#include <vector>
 class GameManager
 {
     public:
+        Room inventory;
+        std::map<std::string, Item> item_map;
+        std::list<Item> item_instances;
+        void Setitem_map(std::map<std::string, Item> val){
+            item_map = val;
+        }
+        void Setitem_instances(std::list<Item> val){
+            item_instances = val;
+        }
+        void take(std::vector<std::string> cmd_list);
+        void drop(std::vector<std::string> cmd_list);
+        void read(std::vector<std::string> cmd_list);
+        void printInventory();
         bool game_exit;
         std::list<Room> rooms; //!< Member variable "rooms"
         Room * current_room;
