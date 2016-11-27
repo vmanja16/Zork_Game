@@ -14,6 +14,7 @@ GameManager::GameManager(std::list<Room> room_list){
     commands.push_back("open exit");
     commands.push_back("open"); commands.push_back("put"); commands.push_back("take");
     commands.push_back("i"); commands.push_back("drop"); commands.push_back("read");
+    commands.push_back("turnon");
     game_exit = false;
     inventory = Room();
     inventory.Setname("inventory");
@@ -73,15 +74,31 @@ void GameManager::parseCommand(std::string cmd){
     if(!cmd_0.compare("drop")){drop(cmd_split);}
     if(!cmd_0.compare("i")){printInventory();}
     if(!cmd_0.compare("read")){read(cmd_split);}
+    if(!cmd_0.compare("turnon")){turnon(cmd_split);}
     if(!command.compare("open exit")){if(current_room->exit){game_exit = true;}else{std::cout<<"Error"<<std::endl;}}
-
-    // n,w,s,e,i,
-    //take(item),
+    // n,w,s,e,i,            --> done
+    //take(item),            --> done
     //open(container),
-    //open exit, read (item)
-    //drop(item), put(item) in (container)
-    // turnon (item), attack (creature) with (item)
-    // open and other commands
+    //open exit, read (item) --> done
+    //drop(item),            --> done
+    //put(item) in (container)
+    //turnon (item),         --> done
+    //attack (creature) with (item)
+}
+
+void GameManager::parseAction(std::string action){
+    std::string act = action;
+    std::vector<std::string> action_split;
+    std::istringstream iss(action);
+    for(std::string action; iss >> action;){action_split.push_back(action);}
+    std::string act0 = action_split[0];
+    if (!act0.compare("Update")){
+        for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+             if(!it->Getname().compare(action_split[1])){
+                 it->Setstatus(action_split[3]); // assumes we have a status in idx:3
+             }
+        }
+    }
 }
 
 void GameManager::read(std::vector<std::string> cmd_list){
@@ -103,6 +120,36 @@ void GameManager::read(std::vector<std::string> cmd_list){
             }
         }
         if(!read){std::cout << "Error: Item " << cmd_list[1] << " is not in inventory." << std::endl;}
+    }
+}
+
+void GameManager::turnon(std::vector<std::string> cmd_list){
+    std::list<std::string> prints, actions;
+    bool turned = false;
+    if(cmd_list.size() <=1){
+        std::cout << "Turnon what?" << std::endl;
+    }
+    else{
+        for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+            if(!it->Getname().compare(cmd_list[1])){
+                if(it->Getowner()==NULL){continue;}
+                if(!it->Getowner()->Getname().compare("inventory")){
+                    if (it->Gethas_turnon()){
+                        prints = it->Getturnon_prints();
+                        actions = it->Getturnon_actions();
+                        for(std::list<std::string>::iterator iter=prints.begin(); iter != prints.end(); iter++){
+                            std::cout << *iter << std::endl;//
+                        }
+                        for(std::list<std::string>::iterator iter=actions.begin(); iter != actions.end(); iter++){
+                            parseAction(*iter);
+                        }
+                        turned= true; break;
+                    }
+                    else{turned=true; std::cout << "Error: Item " << cmd_list[1] << " cannot turn on." << std::endl; break;}
+               }
+            }
+        }
+        if(!turned){std::cout << "Error: Item " << cmd_list[1] << " is not in inventory." << std::endl;}
     }
 }
 

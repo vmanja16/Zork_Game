@@ -3,6 +3,7 @@
 #include <list>
 #include "Room.h"
 #include "Item.h"
+#include "Container.h"
 #include <algorithm>
 #include <map>
 #include <vector>
@@ -11,16 +12,26 @@ class GameManager
     public:
         Room inventory;
         std::map<std::string, Item> item_map;
+        std::map<std::string, Container> container_map;
         std::list<Item> item_instances;
+        std::list<Container> container_instances;
         void Setitem_map(std::map<std::string, Item> val){
             item_map = val;
+        }
+        void Setcontainer_map(std::map<std::string, Container> val){
+            container_map = val;
         }
         void Setitem_instances(std::list<Item> val){
             item_instances = val;
         }
+        void Setcontainer_instances(std::list<Container> val){
+            container_instances = val;
+        }
         void take(std::vector<std::string> cmd_list);
         void drop(std::vector<std::string> cmd_list);
         void read(std::vector<std::string> cmd_list);
+        void turnon(std::vector<std::string> cmd_list);
+        void parseAction(std::string action);
         void printInventory();
         bool game_exit;
         std::list<Room> rooms; //!< Member variable "rooms"

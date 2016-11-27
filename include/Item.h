@@ -2,6 +2,7 @@
 #define ITEM_H
 
 #include <GameObject.h>
+#include <list>
 
 
 class Item : public GameObject
@@ -11,10 +12,12 @@ class Item : public GameObject
         virtual ~Item();
         std::string Getwriting() {return writing; }
         void Setwriting(std::string val) {writing = val; }
-        std::string Getprint() {return print; }
-        void Setprint(std::string val) {print = val; }
-        std::string Getaction() {return action; }
-        void Setaction(std::string val) {action = val; }
+
+        std::list<std::string> Getturnon_prints() {return turnon_prints; }
+        void Setturnon_print(std::string val) {turnon_prints.push_back(val); }
+        std::list<std::string> Getturnon_actions() {return turnon_actions; }
+        void Setturnon_action(std::string val) {turnon_actions.push_back(val); }
+
         bool Gethas_turnon() {return has_turnon; }
         void Sethas_turnon(bool val) {has_turnon = val; }
         bool Getturned_on() {return turned_on; }
@@ -25,8 +28,8 @@ class Item : public GameObject
     private:
         GameObject * owner;
         std::string writing;
-        std::string print;
-        std::string action;
+        std::list<std::string> turnon_prints;
+        std::list <std::string> turnon_actions;
         bool has_turnon;
         bool turned_on;
 };
