@@ -14,7 +14,7 @@ GameManager::GameManager(std::list<Room> room_list){
     commands.push_back("open exit");
     commands.push_back("open"); commands.push_back("put"); commands.push_back("take");
     commands.push_back("i"); commands.push_back("drop"); commands.push_back("read");
-    commands.push_back("turnon");
+    commands.push_back("turnon"); commands.push_back("attack");
     game_exit = false;
     inventory = Room();
     inventory.Setname("inventory");
@@ -76,14 +76,59 @@ void GameManager::parseCommand(std::string cmd){
     if(!cmd_0.compare("read")){read(cmd_split);}
     if(!cmd_0.compare("turnon")){turnon(cmd_split);}
     if(!command.compare("open exit")){if(current_room->exit){game_exit = true;}else{std::cout<<"Error"<<std::endl;}}
+    else if(!cmd_0.compare("open")){open(cmd_split);}
+    if(!cmd_0.compare("attack")){attack(cmd_split);}
     // n,w,s,e,i,            --> done
     //take(item),            --> done
-    //open(container),
-    //open exit, read (item) --> done
+    //open(container),           X    TODO: (item availability, container acceptability)
+    //open exit,             --> done
+    //read (item)            --> done
     //drop(item),            --> done
     //put(item) in (container)
     //turnon (item),         --> done
     //attack (creature) with (item)
+}
+
+void GameManager::attack(std::vector<std::string> cmd_list){
+    bool attacked = false;
+    if (cmd_list.size() != 3){
+        std::cout << "Error" << std::endl;
+    }
+    else{
+
+    }
+}
+
+void GameManager::open(std::vector<std::string> cmd_list){
+    bool opened = false,has_items = false;
+    std::list<Item> container_items;
+    if(cmd_list.size() <=1){
+        std::cout << "Open what?" << std::endl; return;
+    }
+    else{
+        for (std::list<Container>::iterator con=container_instances.begin();con != container_instances.end(); con++){
+            if(!con->Getname().compare(cmd_list[1])){
+                if(con->Getowner()->Getname() == current_room->Getname()){
+                    for(std::list<Item>::iterator itt=item_instances.begin(); itt != item_instances.end(); itt++){
+                        if(itt->Getowner()==NULL){continue;}
+                        if( !itt->Getowner()->Getname().compare(con->Getname())){
+                            if (!has_items){
+                                std::cout << cmd_list[1] << " contains " << itt->Getname();
+                                has_items = true;
+                            }
+                            else{
+                                std::cout <<", " << itt->Getname();
+                            }
+                        }
+                    }
+                    opened = true;
+                }
+            }
+        }
+        if(opened==false){std::cout << "Error" << std::endl; return;}
+        if(!has_items){std::cout << cmd_list[1] << " is empty." << std::endl;}
+        else{std::cout << std::endl;}
+    }
 }
 
 void GameManager::parseAction(std::string action){
@@ -94,11 +139,22 @@ void GameManager::parseAction(std::string action){
     std::string act0 = action_split[0];
     if (!act0.compare("Update")){
         for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
-             if(!it->Getname().compare(action_split[1])){
+            if(!it->Getname().compare(action_split[1])){
                  it->Setstatus(action_split[3]); // assumes we have a status in idx:3
-             }
+            }
+        }
+        for (std::list<Room>::iterator it=rooms.begin();it != rooms.end(); it++){
+            if(!it->Getname().compare(action_split[1])){
+                 it->Setstatus(action_split[3]); // assumes we have a status in idx:3
+            }
+        }
+        for (std::list<Container>::iterator it=container_instances.begin();it != container_instances.end(); it++){
+            if(!it->Getname().compare(action_split[1])){
+                 it->Setstatus(action_split[3]); // assumes we have a status in idx:3
+            }
         }
     }
+    if(!act.compare("Game Over")){game_exit=true;}
 }
 
 void GameManager::read(std::vector<std::string> cmd_list){
@@ -180,13 +236,22 @@ void GameManager::take(std::vector<std::string> cmd_list){
     }
     else{
         for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
-
             if(!it->Getname().compare(cmd_list[1])){
                 if(it->Getowner()==NULL){continue;}
                 if(!it->Getowner()->Getname().compare(current_room->Getname())){
                     it->Setowner(&inventory);
                     taken = true; break;
-               }
+                }
+                for(std::list<Container>::iterator con=container_instances.begin();con != container_instances.end(); con++){
+                    if (con->Getowner()==NULL){continue;}
+                    if (!con->Getowner()->Getname().compare(current_room->Getname())){
+                        if(!it->Getowner()->Getname().compare(con->Getname())){
+                            it->Setowner(&inventory);
+                            taken = true; break;
+                        }
+
+                    }
+                }
             }
         }
         if(taken){std::cout << "Item " << cmd_list[1] <<

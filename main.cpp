@@ -54,6 +54,10 @@ void getRoomInfo(xml_node<> * lvl_node, Room * temp_room){
         if (!value.compare("item")){
             temp_room->items_list.push_back(lvl_node->value());
         }
+        if(!value.compare("container")){
+            temp_room->containers_list.push_back(lvl_node->value());
+        }
+
         lvl_node = lvl_node->next_sibling();
     }
 }
@@ -121,7 +125,7 @@ int main()
 {
 
     xml_document<> doc;
-    xml_node<> * mapNode, *lvl_node;
+    xml_node<> * mapNode;
     std::list<Room> rooms;
     std::list<Item> items;
     std::list<Container> containers;

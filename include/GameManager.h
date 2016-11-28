@@ -27,6 +27,8 @@ class GameManager
         void Setcontainer_instances(std::list<Container> val){
             container_instances = val;
         }
+        void attack(std::vector<std::string> cmd_list);
+        void open(std::vector<std::string> cmd_list);
         void take(std::vector<std::string> cmd_list);
         void drop(std::vector<std::string> cmd_list);
         void read(std::vector<std::string> cmd_list);
