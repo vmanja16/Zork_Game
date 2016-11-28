@@ -34,6 +34,16 @@ Room * GameManager::getRoom(std::string room_name){
     return room;
 }
 
+Container * GameManager::getContainerInstance(std::string container_name){
+    Container * container = NULL;
+    for (std::list<Container>::iterator it=container_instances.begin();it != container_instances.end(); it++){
+        if(!container_name.compare(it->name)){
+            container = &*it;
+        }
+    }
+    return container;
+}
+
 void GameManager::enterRoom(std::string room_name){
     current_room = getRoom(room_name);
     if(!current_room->description.empty()){
@@ -87,10 +97,11 @@ void GameManager::parseCommand(std::string cmd){
     //put(item) in (container)       X
     //turnon (item),               --> done
     //attack (creature) with (item)  X TODO: check conditions
-    //Update                       --> done
-    //Add                            X
-    //Delete                         X
+    //update                       --> done
+    //add                          --> done
+    //delete                         X
     //GameOver                     --> done
+    //Triggers                       X
 }
 
 /**                           ATTACK
@@ -177,27 +188,53 @@ void GameManager::parseAction(std::string action){
     std::istringstream iss(action);
     for(std::string action; iss >> action;){action_split.push_back(action);}
     std::string act0 = action_split[0];
-    if (!act0.compare("Update")){
-        for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
-            if(!it->Getname().compare(action_split[1])){
-                 it->Setstatus(action_split[3]); // assumes we have a status in idx:3
-            }
-        }
-        for (std::list<Room>::iterator it=rooms.begin();it != rooms.end(); it++){
-            if(!it->Getname().compare(action_split[1])){
-                 it->Setstatus(action_split[3]); // assumes we have a status in idx:3
-            }
-        }
-        for (std::list<Container>::iterator it=container_instances.begin();it != container_instances.end(); it++){
-            if(!it->Getname().compare(action_split[1])){
-                 it->Setstatus(action_split[3]); // assumes we have a status in idx:3
-            }
-        }
-    }
-    else if(!act0.compare("Add")){} // TODO: Add objects
+    if (!act0.compare("Update")){update(action_split);}
+    else if(!act0.compare("Add")){ add(action_split);}
     else if(!act0.compare("Delete")){} // TODO: Delete objects
     else if(!act.compare("Game Over")){game_exit=true;}
     else{parseCommand(act);}
+}
+
+void GameManager::update(std::vector<std::string> action_split){
+    for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+        if(!it->Getname().compare(action_split[1])){
+             it->Setstatus(action_split[3]); // assumes we have a status in idx:3
+        }
+    }
+    for (std::list<Room>::iterator it=rooms.begin();it != rooms.end(); it++){
+        if(!it->Getname().compare(action_split[1])){
+             it->Setstatus(action_split[3]); // assumes we have a status in idx:3
+        }
+    }
+    for (std::list<Container>::iterator it=container_instances.begin();it != container_instances.end(); it++){
+        if(!it->Getname().compare(action_split[1])){
+             it->Setstatus(action_split[3]); // assumes we have a status in idx:3
+        }
+    }
+}
+
+void GameManager::add(std::vector<std::string> action_split){
+    std::string obj = action_split[1], owner_name = action_split[3];
+    GameObject * owner;
+    Room * room = getRoom(owner_name);
+    Container * container = getContainerInstance(owner_name);
+    if(room != NULL){owner = room;}else{owner=container;}
+    if(container_map.find(obj) != container_map.end()){ // is container!
+        Container new_container = container_map[obj];
+        new_container.Setowner(room);
+        container_instances.push_back(new_container);
+    }
+    else if(item_map.find(obj) != item_map.end()){ // is item
+        Item new_item = item_map[obj];
+        new_item.Setowner(owner);
+        item_instances.push_back(new_item);
+    }
+    else if(creature_map.find(obj) != creature_map.end()){ // is container!
+        Creature new_creature= creature_map[obj];
+        new_creature.Setowner(room);
+        creature_instances.push_back(new_creature);
+    }
+
 }
 
 /**=======================  READ ===========================================================================*/

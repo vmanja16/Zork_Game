@@ -65,6 +65,9 @@ class GameManager
         void parseCommand(std::string cmd);
         void loopGame();
         void goDirection(std::string dir);
+        Container * getContainerInstance(std::string container_name);
+        void add(std::vector<std::string> action_split);
+        void update(std::vector<std::string> action_split);
 
     protected:
     private:

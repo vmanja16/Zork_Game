@@ -17,7 +17,8 @@
 using namespace rapidxml;
 //std::string file_name = "itemsample.xml";
 //std::string file_name = "roomsample.xml";
-std::string file_name = "sample.txt.xml";
+//std::string file_name = "sample.txt.xml";
+std::string file_name = "modified_sample.xml";
 void setBorder(xml_node<> * lvl_node, Room * room){
     xml_node<> * node = lvl_node->first_node(); //dir or name
     std::string name, value, dir, border_name;
