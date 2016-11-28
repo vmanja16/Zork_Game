@@ -10,7 +10,7 @@ class Room: public GameObject
     public:
         Room();
         bool exit;
-        std::list<std::string> items_list, containers_list;
+        std::list<std::string> items_list, containers_list, creatures_list;
         std::map<std::string, std::string> border_map;
         virtual ~Room();
     protected:

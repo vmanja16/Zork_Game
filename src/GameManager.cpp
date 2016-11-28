@@ -14,7 +14,7 @@ GameManager::GameManager(std::list<Room> room_list){
     commands.push_back("open exit");
     commands.push_back("open"); commands.push_back("put"); commands.push_back("take");
     commands.push_back("i"); commands.push_back("drop"); commands.push_back("read");
-    commands.push_back("turnon"); commands.push_back("attack");
+    commands.push_back("turn"); commands.push_back("attack");
     game_exit = false;
     inventory = Room();
     inventory.Setname("inventory");
@@ -70,35 +70,71 @@ void GameManager::parseCommand(std::string cmd){
     std::string cmd_0 = cmd_split[0];
     // GameManager::checkTriggers(command){return if triggered};
     if (std::find(dirs.begin(), dirs.end(), command) != dirs.end()){goDirection(command);}
-    if(!cmd_0.compare("take")){take(cmd_split);}
-    if(!cmd_0.compare("drop")){drop(cmd_split);}
-    if(!cmd_0.compare("i")){printInventory();}
-    if(!cmd_0.compare("read")){read(cmd_split);}
-    if(!cmd_0.compare("turnon")){turnon(cmd_split);}
-    if(!command.compare("open exit")){if(current_room->exit){game_exit = true;}else{std::cout<<"Error"<<std::endl;}}
+    else if(!cmd_0.compare("take")){take(cmd_split);}
+    else if(!cmd_0.compare("drop")){drop(cmd_split);}
+    else if(!cmd_0.compare("i")){printInventory();}
+    else if(!cmd_0.compare("read")){read(cmd_split);}
+    else if(!cmd_0.compare("turn")){turnon(cmd_split);}
+    else if(!command.compare("open exit")){if(current_room->exit){game_exit = true;}else{std::cout<<"Error"<<std::endl;}}
     else if(!cmd_0.compare("open")){open(cmd_split);}
-    if(!cmd_0.compare("attack")){attack(cmd_split);}
-    // n,w,s,e,i,            --> done
-    //take(item),            --> done
-    //open(container),           X    TODO: (item availability, container acceptability)
-    //open exit,             --> done
-    //read (item)            --> done
-    //drop(item),            --> done
-    //put(item) in (container)
-    //turnon (item),         --> done
-    //attack (creature) with (item)
+    else if(!cmd_0.compare("attack")){attack(cmd_split);}
+    // n,w,s,e,i,                  --> done
+    //take(item),                  --> done
+    //open(container),               X    TODO: (container acceptability affects ability to open!)
+    //open exit,                   --> done
+    //read (item)                  --> done
+    //drop(item),                  --> done
+    //put(item) in (container)       X
+    //turnon (item),               --> done
+    //attack (creature) with (item)  X TODO: check conditions
+    //Update                       --> done
+    //Add                            X
+    //Delete                         X
+    //GameOver                     --> done
 }
 
+/**                           ATTACK
+============================================================================================================*/
 void GameManager::attack(std::vector<std::string> cmd_list){
-    bool attacked = false;
-    if (cmd_list.size() != 3){
-        std::cout << "Error" << std::endl;
+    bool in_inventory = false, in_room = false;;
+    std::list<std::string> prints, actions;
+    if (cmd_list.size() != 4){
+        std::cout << "Error" << std::endl; return;
     }
-    else{
+    else{ // check if item in inventory
+        for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+            if(!it->Getname().compare(cmd_list[3])){
+                if(it->Getowner()==NULL){continue;}
+                if(!it->Getowner()->Getname().compare("inventory")){ in_inventory=true;break;}
+            }
+        }
+        if (!in_inventory){std::cout << "Error: Item " << cmd_list[3] << " is not in inventory." << std::endl; return;}
 
+        for (std::list<Creature>::iterator it=creature_instances.begin(); it != creature_instances.end(); it++){
+            if(!it->Getname().compare(cmd_list[1])){
+                if(it->Getowner()==NULL){continue;}
+                if(!it->Getowner()->Getname().compare(current_room->Getname())){
+                    // TODO: check conditions if they exist and ONLY THEN do the following prints/actions
+                    if(!it->has_attack){break;}
+                    prints = it->Getattack_prints();
+                    actions = it->Getattack_actions();
+                    for(std::list<std::string>::iterator iter=prints.begin(); iter != prints.end(); iter++){
+                        std::cout << *iter << std::endl;//
+                    }
+                    for(std::list<std::string>::iterator iter=actions.begin(); iter != actions.end(); iter++){
+                        parseAction(*iter);
+                    }
+                    in_room=true;
+                    break;
+                }
+            }
+        }
+        if(!in_room){std::cout << "Error" << std::endl;return;}
     }
 }
 
+/**                           OPEN
+============================================================================================================*/
 void GameManager::open(std::vector<std::string> cmd_list){
     bool opened = false,has_items = false;
     std::list<Item> container_items;
@@ -109,6 +145,8 @@ void GameManager::open(std::vector<std::string> cmd_list){
         for (std::list<Container>::iterator con=container_instances.begin();con != container_instances.end(); con++){
             if(!con->Getname().compare(cmd_list[1])){
                 if(con->Getowner()->Getname() == current_room->Getname()){
+                    // OPEN THE CONTAINER!
+                    con->Setopen(true);
                     for(std::list<Item>::iterator itt=item_instances.begin(); itt != item_instances.end(); itt++){
                         if(itt->Getowner()==NULL){continue;}
                         if( !itt->Getowner()->Getname().compare(con->Getname())){
@@ -131,6 +169,8 @@ void GameManager::open(std::vector<std::string> cmd_list){
     }
 }
 
+/**                           ACTIONS
+============================================================================================================*/
 void GameManager::parseAction(std::string action){
     std::string act = action;
     std::vector<std::string> action_split;
@@ -154,9 +194,13 @@ void GameManager::parseAction(std::string action){
             }
         }
     }
-    if(!act.compare("Game Over")){game_exit=true;}
+    else if(!act0.compare("Add")){} // TODO: Add objects
+    else if(!act0.compare("Delete")){} // TODO: Delete objects
+    else if(!act.compare("Game Over")){game_exit=true;}
+    else{parseCommand(act);}
 }
 
+/**=======================  READ ===========================================================================*/
 void GameManager::read(std::vector<std::string> cmd_list){
     bool read = false;
     if(cmd_list.size() <=1){
@@ -179,15 +223,15 @@ void GameManager::read(std::vector<std::string> cmd_list){
     }
 }
 
+/**      ================= TURNON ========================================================================== */
 void GameManager::turnon(std::vector<std::string> cmd_list){
     std::list<std::string> prints, actions;
     bool turned = false;
-    if(cmd_list.size() <=1){
-        std::cout << "Turnon what?" << std::endl;
-    }
+    if(cmd_list.size() != 3){std::cout << "Error" << std::endl; return;}
+    if(cmd_list[1].compare("on")){std::cout << "Error" << std::endl;return;}
     else{
         for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
-            if(!it->Getname().compare(cmd_list[1])){
+            if(!it->Getname().compare(cmd_list[2])){
                 if(it->Getowner()==NULL){continue;}
                 if(!it->Getowner()->Getname().compare("inventory")){
                     if (it->Gethas_turnon()){
@@ -201,7 +245,7 @@ void GameManager::turnon(std::vector<std::string> cmd_list){
                         }
                         turned= true; break;
                     }
-                    else{turned=true; std::cout << "Error: Item " << cmd_list[1] << " cannot turn on." << std::endl; break;}
+                    else{turned=true; std::cout << "Error: Item " << cmd_list[2] << " cannot turn on." << std::endl; break;}
                }
             }
         }
@@ -209,6 +253,8 @@ void GameManager::turnon(std::vector<std::string> cmd_list){
     }
 }
 
+/**                           DROP
+============================================================================================================*/
 void GameManager::drop(std::vector<std::string> cmd_list){
     bool dropped = false;
     if(cmd_list.size() <=1){
@@ -228,7 +274,8 @@ void GameManager::drop(std::vector<std::string> cmd_list){
         else{std::cout << "Error: Item " << cmd_list[1] << " is not in inventory." << std::endl;}
     }
 }
-
+/**                           TAKE
+*/
 void GameManager::take(std::vector<std::string> cmd_list){
     bool taken = false;
     if(cmd_list.size() <=1){
@@ -244,6 +291,7 @@ void GameManager::take(std::vector<std::string> cmd_list){
                 }
                 for(std::list<Container>::iterator con=container_instances.begin();con != container_instances.end(); con++){
                     if (con->Getowner()==NULL){continue;}
+                    if(!con->isOpen()){continue;}
                     if (!con->Getowner()->Getname().compare(current_room->Getname())){
                         if(!it->Getowner()->Getname().compare(con->Getname())){
                             it->Setowner(&inventory);
@@ -260,7 +308,6 @@ void GameManager::take(std::vector<std::string> cmd_list){
         else{std::cout << "Error" << std::endl;}
     }
 }
-
 void GameManager::printInventory(){
     std::cout << "Inventory: ";
     bool has_items = false;
@@ -278,22 +325,18 @@ void GameManager::printInventory(){
     if(!has_items){std::cout << "empty";}
     std::cout << std::endl;
 }
-
 void GameManager::goDirection(std::string dir){
     std::string room_name = current_room->border_map[dir];
     if (!room_name.empty()){enterRoom(room_name);}
-    else{std::cout << "Can't go there!" << std::endl;}
+    else{std::cout << "Can't go that way!" << std::endl;}
 }
-
 /**
     GAME CONTROL
 */
-
 void GameManager::start(){
     enterRoom("Entrance");
     loopGame();
 }
-
 void GameManager::loopGame(){
     std::string cmd;
     while(!game_exit){
@@ -302,7 +345,18 @@ void GameManager::loopGame(){
     }
     std::cout << "Game Over" << std::endl;
 }
-
+void GameManager::print_item_instances(){
+    for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+        std::cout << "Name:: " << it->name << std::endl;
+        std::cout << "\tDescription:: " << it->description << std::endl;
+        std::cout << "\tStatus:: " << it->description << std::endl;
+        std::cout << "\tWriting::" << it->Getwriting() << std::endl;
+        std::cout << "\tTurnOn::" << it->Gethas_turnon() << std::endl;
+        //std::cout << "\t\tPrint::" << it->Getprint() << std::endl;
+        //std::cout << "\t\tAction::" << it->Getaction() << std::endl;
+        if(it->Getowner()!=NULL){std::cout << "\t\tOwner::" << it->Getowner()->Getname() << std::endl;}
+    }
+}
 void GameManager::print_rooms(){
     // PRINT OUT THE ROOM's CONTENTS!
     for (std::list<Room>::iterator it=rooms.begin();it != rooms.end(); it++){

@@ -12,6 +12,7 @@
 #include "Room.h"
 #include "GameManager.h"
 #include "Item.h"
+#include "Creature.h"
 
 using namespace rapidxml;
 //std::string file_name = "itemsample.xml";
@@ -57,7 +58,9 @@ void getRoomInfo(xml_node<> * lvl_node, Room * temp_room){
         if(!value.compare("container")){
             temp_room->containers_list.push_back(lvl_node->value());
         }
-
+        if(!value.compare("creature")){
+            temp_room->creatures_list.push_back(lvl_node->value());
+        }
         lvl_node = lvl_node->next_sibling();
     }
 }
@@ -121,6 +124,30 @@ void getContainerInfo(xml_node<> * lvl_node, Container * temp_container){
 
 }
 
+void getCreatureInfo(xml_node<> * lvl_node, Creature * temp_creature){
+    std::string value;
+    while(lvl_node != NULL){
+        value = lvl_node->name();
+        if (!value.compare("name")){
+            temp_creature->name = lvl_node->value();
+        }
+        if (!value.compare("description")){
+            temp_creature->description = lvl_node->value();
+        }
+        if (!value.compare("status")){
+            temp_creature->status = lvl_node->value();
+        }
+        if (!value.compare("vulnerablity")){
+            temp_creature->Setvulnerabilities(lvl_node->value());
+        }
+        if (!value.compare("attack")){
+            temp_creature->has_attack = true;
+        }
+        lvl_node = lvl_node->next_sibling();
+    }
+
+
+}
 int main()
 {
 
@@ -129,8 +156,10 @@ int main()
     std::list<Room> rooms;
     std::list<Item> items;
     std::list<Container> containers;
+    std::list<Creature> creatures;
     std::map<std::string,Item> item_map;
     std::map<std::string,Container> container_map;
+    std::map<std::string,Creature> creature_map;
 
     std::string name;
 
@@ -148,12 +177,14 @@ int main()
     Room temp_room;
     Item temp_item;
     Container temp_container;
+    Creature temp_creature;
  // BUILDING ROOM_MAP, ITEM_MAP, CONTAINER_MAP
     while(mapNode != NULL){
         name = mapNode->name();
         temp_room = Room();
         temp_item = Item();
         temp_container = Container();
+        temp_creature = Creature();
         if(!name.compare("room")){
             getRoomInfo(mapNode->first_node(), &temp_room);
             rooms.push_back(temp_room);
@@ -166,10 +197,14 @@ int main()
             getContainerInfo(mapNode->first_node(), &temp_container);
             container_map[temp_container.name] = temp_container;
         }
+        else if (!name.compare("creature")){
+            getCreatureInfo(mapNode->first_node(), &temp_creature);
+            creature_map[temp_creature.name] = temp_creature;
+        }
         mapNode = mapNode->next_sibling(); // move ptr
     }
 
-    // 2nd pass through rooms to add item and container instances with their respective room owners
+    // 2nd pass through rooms to add item, container, and creature instances with their respective room owners
     for (std::list<Room>::iterator it=rooms.begin();it != rooms.end(); it++){
         for (std::list<std::string>::iterator itt=it->items_list.begin();itt != it->items_list.end(); itt++){
             Item item_instance = item_map[*itt]; item_instance.Setowner(&*it); items.push_back(item_instance);
@@ -177,6 +212,10 @@ int main()
         for (std::list<std::string>::iterator itt=it->containers_list.begin();itt != it->containers_list.end(); itt++){
             Container container_instance = container_map[*itt]; container_instance.Setowner(&*it); containers.push_back(container_instance);
         }
+        for (std::list<std::string>::iterator itt=it->creatures_list.begin();itt != it->creatures_list.end(); itt++){
+            Creature creature_instance = creature_map[*itt]; creature_instance.Setowner(&*it); creatures.push_back(creature_instance);
+        }
+
     }
     // 2nd pass through containers to add item instances with their respective container owners
     for(std::list<Container>::iterator it=containers.begin(); it!= containers.end(); it++){
@@ -192,21 +231,11 @@ int main()
     game_manager.Setitem_map(item_map);
     game_manager.Setcontainer_instances(containers);
     game_manager.Setcontainer_map(container_map);
+    game_manager.Setcreature_instances(creatures);
+    game_manager.Setcreature_map(creature_map);
     //game_manager.print_rooms();
-/*
-    for (std::list<Item>::iterator it=items.begin();it != items.end(); it++){
-        std::cout << "Name:: " << it->name << std::endl;
-        std::cout << "\tDescription:: " << it->description << std::endl;
-        std::cout << "\tStatus:: " << it->description << std::endl;
-        std::cout << "\tWriting::" << it->Getwriting() << std::endl;
-        std::cout << "\tTurnOn::" << it->Gethas_turnon() << std::endl;
-        std::cout << "\t\tPrint::" << it->Getprint() << std::endl;
-        std::cout << "\t\tAction::" << it->Getaction() << std::endl;
-        if(it->Getowner()!=NULL){std::cout << "\t\tOwner::" << it->Getowner()->Getname() << std::endl;}
-    }
-*/
+    //game_manager.print_item_instances();
     game_manager.start();
-
 
     return 0;
 }

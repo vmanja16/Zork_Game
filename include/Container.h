@@ -8,6 +8,8 @@
 class Container : public GameObject
 {
     public:
+        bool isOpen(){return open;}
+        void Setopen(bool val){open = val;}
         Container();
         virtual ~Container();
         std::list<std::string> Getacceptable_items() { return acceptable_items; }
@@ -20,7 +22,7 @@ class Container : public GameObject
         std::list<std::string> item_list;
     protected:
     private:
-
+        bool open;
         Room * owner;
 };
 
