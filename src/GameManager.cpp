@@ -14,7 +14,7 @@ GameManager::GameManager(std::list<Room> room_list){
     commands.push_back("open exit");
     commands.push_back("open"); commands.push_back("put"); commands.push_back("take");
     commands.push_back("i"); commands.push_back("drop"); commands.push_back("read");
-    commands.push_back("turn"); commands.push_back("attack");
+    commands.push_back("turn"); commands.push_back("attack"); commands.push_back("put");
     game_exit = false;
     inventory = Room();
     inventory.Setname("inventory");
@@ -43,6 +43,7 @@ Container * GameManager::getContainerInstance(std::string container_name){
     }
     return container;
 }
+
 
 void GameManager::enterRoom(std::string room_name){
     current_room = getRoom(room_name);
@@ -88,6 +89,7 @@ void GameManager::parseCommand(std::string cmd){
     else if(!command.compare("open exit")){if(current_room->exit){game_exit = true;}else{std::cout<<"Error"<<std::endl;}}
     else if(!cmd_0.compare("open")){open(cmd_split);}
     else if(!cmd_0.compare("attack")){attack(cmd_split);}
+    else if(!cmd_0.compare("put")){put(cmd_split);}
     // n,w,s,e,i,                  --> done
     //take(item),                  --> done
     //open(container),               X    TODO: (container acceptability affects ability to open!)
@@ -99,13 +101,18 @@ void GameManager::parseCommand(std::string cmd){
     //attack (creature) with (item)  X TODO: check conditions
     //update                       --> done
     //add                          --> done
-    //delete                         X
+    //delete                       --> done
     //GameOver                     --> done
     //Triggers                       X
 }
 
 /**                           ATTACK
 ============================================================================================================*/
+
+void GameManager::put(std::vector<std::string> cmd_list){
+
+}
+
 void GameManager::attack(std::vector<std::string> cmd_list){
     bool in_inventory = false, in_room = false;;
     std::list<std::string> prints, actions;
@@ -190,7 +197,7 @@ void GameManager::parseAction(std::string action){
     std::string act0 = action_split[0];
     if (!act0.compare("Update")){update(action_split);}
     else if(!act0.compare("Add")){ add(action_split);}
-    else if(!act0.compare("Delete")){} // TODO: Delete objects
+    else if(!act0.compare("Delete")){Delete(action_split);} // TODO: Delete objects
     else if(!act.compare("Game Over")){game_exit=true;}
     else{parseCommand(act);}
 }
@@ -213,6 +220,40 @@ void GameManager::update(std::vector<std::string> action_split){
     }
 }
 
+void GameManager::Delete(std::vector<std::string> action_split){
+    // Remove Item
+    std::list<Item>::iterator it=item_instances.begin();
+    while (it != item_instances.end()){
+        if(!it->Getname().compare(action_split[1])){
+            item_instances.erase(it++); break;
+        }
+        else{it++;}
+    }
+    // Remove Container
+    std::list<Container>::iterator con=container_instances.begin();
+    while(con != container_instances.end()){
+        if(!con->Getname().compare(action_split[1])){
+            container_instances.erase(con++); break;
+        }
+        else{con++;}
+    }
+    // Remove Room
+    std::list<Room>::iterator rm=rooms.begin();
+    while (rm != rooms.end()){
+        if(!rm->Getname().compare(action_split[1])){
+            rooms.erase(rm++);
+        }
+        else{
+            if(!rm->border_map["n"].compare(action_split[1])){rm->border_map["n"]="";}
+            else if(!rm->border_map["s"].compare(action_split[1])){rm->border_map["s"]="";}
+            else if(!rm->border_map["w"].compare(action_split[1])){rm->border_map["w"]="";}
+            else if(!rm->border_map["e"].compare(action_split[1])){rm->border_map["e"]="";}
+            rm++;
+        }
+    }
+
+}
+
 void GameManager::add(std::vector<std::string> action_split){
     std::string obj = action_split[1], owner_name = action_split[3];
     GameObject * owner;
@@ -221,6 +262,9 @@ void GameManager::add(std::vector<std::string> action_split){
     if(room != NULL){owner = room;}else{owner=container;}
     if(container_map.find(obj) != container_map.end()){ // is container!
         Container new_container = container_map[obj];
+        for (std::list<std::string>::iterator itt=new_container.item_list.begin();itt != new_container.item_list.end(); itt++){
+            Item item_instance = item_map[*itt]; item_instance.Setowner(&new_container); item_instances.push_back(item_instance);
+        }
         new_container.Setowner(room);
         container_instances.push_back(new_container);
     }

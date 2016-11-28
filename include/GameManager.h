@@ -42,6 +42,7 @@ class GameManager
         void drop(std::vector<std::string> cmd_list);
         void read(std::vector<std::string> cmd_list);
         void turnon(std::vector<std::string> cmd_list);
+        void put(std::vector<std::string> cmd_list);
         void parseAction(std::string action);
         void printInventory();
         bool game_exit;
@@ -68,7 +69,7 @@ class GameManager
         Container * getContainerInstance(std::string container_name);
         void add(std::vector<std::string> action_split);
         void update(std::vector<std::string> action_split);
-
+        void Delete (std::vector<std::string> action_split);
     protected:
     private:
 
