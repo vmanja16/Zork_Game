@@ -106,13 +106,44 @@ void GameManager::parseCommand(std::string cmd){
     //Triggers                       X
 }
 
-/**                           ATTACK
-============================================================================================================*/
+/**   ======================         PUT       ==================================*/
 
 void GameManager::put(std::vector<std::string> cmd_list){
-
+    bool in_inventory=false, put_in = false, is_item = true;
+    if(cmd_list.size() != 4){std::cout << "Error" << std::endl; return;}
+    // Get container
+    Container * container = getContainerInstance(cmd_list[3]);
+    if(container == NULL){std::cout << "Error" << std::endl;return;}
+    if(container->Getowner()->Getname().compare(current_room->Getname())){std::cout << "Error" << std::endl;return;}
+    for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+        if(!it->Getname().compare(cmd_list[1])){is_item = true; break;}
+    }
+    if(!is_item){std::cout << "Error" << std::endl;return;}
+    // Check item in inventory and add to container if possible
+    for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
+        if(!it->Getname().compare(cmd_list[1])){
+            if(it->Getowner()==NULL){continue;}
+            if(!it->Getowner()->Getname().compare("inventory")){
+                in_inventory=true;
+                // Check if item is acceptable{}
+                if (container->acceptable_items.empty() && container->isOpen()){
+                    it->Setowner(container); put_in = true;
+                }
+                if(std::find(container->acceptable_items.begin(),
+                    container->acceptable_items.end(), cmd_list[1]) != container->acceptable_items.end()){
+                    it->Setowner(container); put_in = true;
+                    container->can_open = true;
+                }
+                break;
+            }
+        }
+    }
+    if (!in_inventory){std::cout << "Error: Item " << cmd_list[1] << " is not in inventory." << std::endl; return;}
+    if(!put_in){std::cout << "Error" << std::endl;}
+    else{std::cout << "Item " << cmd_list[1] << " added to " << cmd_list[3] << "." << std::endl;}
 }
 
+/** =========================       ATTACK     =====================================================*/
 void GameManager::attack(std::vector<std::string> cmd_list){
     bool in_inventory = false, in_room = false;;
     std::list<std::string> prints, actions;
@@ -156,11 +187,10 @@ void GameManager::attack(std::vector<std::string> cmd_list){
 void GameManager::open(std::vector<std::string> cmd_list){
     bool opened = false,has_items = false;
     std::list<Item> container_items;
-    if(cmd_list.size() <=1){
-        std::cout << "Open what?" << std::endl; return;
-    }
+    if(cmd_list.size() <=1){std::cout << "Open what?" << std::endl; return;}
     else{
         for (std::list<Container>::iterator con=container_instances.begin();con != container_instances.end(); con++){
+            if(!con->can_open){break;}
             if(!con->Getname().compare(cmd_list[1])){
                 if(con->Getowner()->Getname() == current_room->Getname()){
                     // OPEN THE CONTAINER!
@@ -172,9 +202,7 @@ void GameManager::open(std::vector<std::string> cmd_list){
                                 std::cout << cmd_list[1] << " contains " << itt->Getname();
                                 has_items = true;
                             }
-                            else{
-                                std::cout <<", " << itt->Getname();
-                            }
+                            else{std::cout <<", " << itt->Getname();}
                         }
                     }
                     opened = true;
@@ -359,9 +387,7 @@ void GameManager::drop(std::vector<std::string> cmd_list){
 */
 void GameManager::take(std::vector<std::string> cmd_list){
     bool taken = false;
-    if(cmd_list.size() <=1){
-        std::cout << "Take what?" << std::endl;
-    }
+    if(cmd_list.size() <=1){std::cout << "Take what?" << std::endl;}
     else{
         for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
             if(!it->Getname().compare(cmd_list[1])){

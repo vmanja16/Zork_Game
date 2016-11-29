@@ -6,6 +6,7 @@ Container::Container()
     std::list<std::string> items = std::list<std::string>();
     owner = NULL;
     open = false;
+    can_open = true;
 }
 
 Container::~Container()

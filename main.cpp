@@ -17,8 +17,8 @@
 using namespace rapidxml;
 //std::string file_name = "itemsample.xml";
 //std::string file_name = "roomsample.xml";
-//std::string file_name = "sample.txt.xml";
-std::string file_name = "modified_sample.xml";
+std::string file_name = "sample.txt.xml";
+//std::string file_name = "modified_sample.xml";
 void setBorder(xml_node<> * lvl_node, Room * room){
     xml_node<> * node = lvl_node->first_node(); //dir or name
     std::string name, value, dir, border_name;
@@ -116,6 +116,7 @@ void getContainerInfo(xml_node<> * lvl_node, Container * temp_container){
         }
         if (!value.compare("accept")){
             temp_container->Setacceptable_items(lvl_node->value());
+            temp_container->can_open = false;
         }
         if (!value.compare("item")){
             temp_container->Setitem_list(lvl_node->value());

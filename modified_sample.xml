@@ -22,7 +22,6 @@
   <room>
     <name>MainCavern</name>
     <description>A huge cavern surrounds you with a locked door to the north, a chest in the center, and a very dark corner...</description>
-    <container>chest</container>
     <container>lock</container>
     <creature>gnome</creature>
     <border>
@@ -59,8 +58,11 @@
     <turnon>
       <print>the torch has erupted into a menacing inferno</print>
       <action>Update torch to inferno</action>
-      <action>Add explosive to Entrance</action>
+      <action>Add chest to MainCavern</action>
+      <action>Add explosive to chest</action>
       <action>n</action>
+      <action>s</action>
+      <action>Delete Staircase</action>
     </turnon>
   </item>
   <item>
@@ -70,6 +72,7 @@
     <turnon>
       <print>you hear ticking...</print>
       <action>Update explosive to ticking</action>
+      <action>Delete chest</action>
     </turnon>
   </item>
   <item>

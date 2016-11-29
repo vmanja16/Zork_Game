@@ -18,6 +18,7 @@ class Container : public GameObject
         Room * Getowner(){return owner;}
         void Setowner(Room * val){owner = val;}
 
+        bool can_open;
         std::list<std::string> acceptable_items;
         std::list<std::string> item_list;
     protected:
