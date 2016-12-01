@@ -133,8 +133,8 @@ void GameManager::put(std::vector<std::string> cmd_list){
 void GameManager::attack(std::vector<std::string> cmd_list){
     bool in_inventory = false, in_room = false;;
     std::list<std::string> prints, actions;
-    if(cmd_list.size() != 4){std::cout << "Error" << std::endl; return;}
-    if(cmd_list[2].compare("with")){std::cout << "Error" << std::endl; return;}
+    if(cmd_list.size() != 4){std::cout << "Error::" << std::endl; return;}
+    if(cmd_list[2].compare("with")){std::cout << "Error:" << std::endl; return;}
     // check if item in inventory
     for (std::list<Item>::iterator it=item_instances.begin();it != item_instances.end(); it++){
         if(!it->Getname().compare(cmd_list[3])){
@@ -143,25 +143,69 @@ void GameManager::attack(std::vector<std::string> cmd_list){
         }
     }
     if (!in_inventory){std::cout << "Error: Item " << cmd_list[3] << " is not in inventory." << std::endl; return;}
+
     for (std::list<Creature>::iterator it=creature_instances.begin(); it != creature_instances.end(); it++){
         if(!it->Getname().compare(cmd_list[1])){
             if(it->Getowner()==NULL){continue;}
             if(!it->Getowner()->Getname().compare(current_room->Getname())){
-                // TODO: check conditions if they exist and ONLY THEN do the following prints/actions
                 if(!it->has_attack){break;}
-                prints = it->Getattack_prints();
-                actions = it->Getattack_actions();
-                for(std::list<std::string>::iterator iter=prints.begin(); iter != prints.end(); iter++){
-                    std::cout << *iter << std::endl;//
+                std::list<std::string> vul = it->Getvulnerabilities();
+                if(std::find(vul.begin(),vul.end(), cmd_list[3]) == vul.end()){break;} // check vulnerable
+                if (checkCondition(it->condition)){
+                    prints = creature_map[it->Getname()].Getcondition().Gettrigger_prints();
+                    actions = creature_map[it->Getname()].Getcondition().Gettrigger_actions();
                 }
-                for(std::list<std::string>::iterator iter=actions.begin(); iter != actions.end(); iter++){
-                    parseAction(*iter);
-                }
+                else{break;}
                 in_room=true; break;
             }
         }
-        if(!in_room){std::cout << "Error" << std::endl;return;}
     }
+    // DO THE ACTIONS!
+    if(in_room){
+        std::cout << "You attack the " << cmd_list[1] << " with the " << cmd_list[3] << "." << std::endl;
+        for(std::list<std::string>::iterator iter=prints.begin(); iter != prints.end(); iter++){
+            std::cout << *iter << std::endl;//
+        }
+        for(std::list<std::string>::iterator iter=actions.begin(); iter != actions.end(); iter++){
+            parseAction(*iter);
+        }
+    }
+    else{std::cout << "Error" << std::endl;return;}
+
+}
+bool GameManager::checkCondition(Trigger trig){
+     // CHECK Condition
+    for(std::list<Item>::iterator it = item_instances.begin(); it != item_instances.end(); it++){
+        if(!it->Getname().compare(trig.Getobject())){
+            if(!trig.Getstatus().empty()){ return !it->Getstatus().compare(trig.Getstatus());}
+            else if(it->Getowner()==NULL){return trig.Gethas().compare("yes");} // true if has=="no"
+            else if(!trig.Gethas().compare("yes")){return !trig.Getowner_name().compare(it->Getowner()->Getname());}
+            else{return trig.Getowner_name().compare(it->Getowner()->Getname());}
+        }
+    }
+    for(std::list<Container>::iterator it = container_instances.begin(); it != container_instances.end(); it++){
+        if(!it->Getname().compare(trig.Getobject())){
+            if(!trig.Getstatus().empty()){ return (!it->Getstatus().compare(trig.Getstatus()));}
+            else if(it->Getowner()==NULL){return trig.Gethas().compare("yes");} // true if has=="no"
+            else if(!trig.Gethas().compare("yes")){return !trig.Getowner_name().compare(it->Getowner()->Getname());}
+            else{return trig.Getowner_name().compare(it->Getowner()->Getname());}
+        }
+    }
+    for(std::list<Creature>::iterator it = creature_instances.begin(); it != creature_instances.end(); it++){
+        if(!it->Getname().compare(trig.Getobject())){
+            if(!trig.Getstatus().empty()){ return (!it->Getstatus().compare(trig.Getstatus()));}
+            else if(it->Getowner()==NULL){return trig.Gethas().compare("yes");} // true if has=="no"
+            else if(!trig.Gethas().compare("yes")){return !trig.Getowner_name().compare(it->Getowner()->Getname());}
+            else{return trig.Getowner_name().compare(it->Getowner()->Getname());}
+        }
+    }
+    for(std::list<Room>::iterator it = rooms.begin(); it != rooms.end(); it++){
+        if(!it->Getname().compare(trig.Getobject())){
+            if(!trig.Getstatus().empty()){ return (!it->Getstatus().compare(trig.Getstatus()));}
+            else{return false;}
+        }
+    }
+    return false;
 }
 /**  ===================== OPEN =================================================*/
 void GameManager::open(std::vector<std::string> cmd_list){
@@ -349,6 +393,11 @@ void GameManager::update(std::vector<std::string> action_split){
              it->Setstatus(action_split[3]); // assumes we have a status in idx:3
         }
     }
+    for (std::list<Creature>::iterator it=creature_instances.begin();it != creature_instances.end(); it++){
+        if(!it->Getname().compare(action_split[1])){
+             it->Setstatus(action_split[3]); // assumes we have a status in idx:3
+        }
+    }
 }
 void GameManager::Delete(std::vector<std::string> action_split){
     // Remove Item
@@ -366,6 +415,14 @@ void GameManager::Delete(std::vector<std::string> action_split){
             container_instances.erase(con++); break;
         }
         else{con++;}
+    }
+        // Remove Creature
+    std::list<Creature>::iterator cre=creature_instances.begin();
+    while(cre != creature_instances.end()){
+        if(!cre->Getname().compare(action_split[1])){
+            creature_instances.erase(cre++); break;
+        }
+        else{cre++;}
     }
     // Remove Room
     std::list<Room>::iterator rm=rooms.begin();

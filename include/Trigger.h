@@ -2,6 +2,7 @@
 #define TRIGGER_H
 #include <list>
 #include <string>
+#include <iostream>
 class Trigger
 {
     public:
@@ -23,6 +24,14 @@ class Trigger
         void Settrigger_prints(std::string val) { trigger_prints.push_back(val); }
         std::list<std::string> Gettrigger_actions() { return trigger_actions; }
         void Settrigger_actions(std::string val) { trigger_actions.push_back(val); }
+        void printTrigger(){
+            std::cout << has << std::endl;
+            std::cout << object << std::endl;
+            std::cout << owner_name << std::endl;
+            std::cout << command << std::endl;
+            std::cout << type << std::endl;
+            std::cout << status << std::endl;
+        }
     protected:
     private:
         std::string has;

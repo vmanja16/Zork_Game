@@ -5,12 +5,14 @@
 #include <list>
 #include "Room.h"
 #include "Item.h"
+#include "Trigger.h"
 
 class Creature : public GameObject
 {
     public:
         Creature();
         virtual ~Creature();
+        Trigger condition;
         std::list<std::string> Getvulnerabilities() { return vulnerabilities; }
         void Setvulnerabilities(std::string val) { vulnerabilities.push_back(val); }
         bool Gethas_attack_condition() { return has_attack_condition; }
@@ -22,6 +24,9 @@ class Creature : public GameObject
         Room * Getowner(){return owner;}
         void Setowner(Room * val){owner = val;}
         bool has_attack;
+        void Setcondition(Trigger val){condition = val;}
+        Trigger Getcondition(){return condition;}
+
     protected:
     private:
         std::list<std::string> vulnerabilities;

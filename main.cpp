@@ -115,8 +115,8 @@ void getCreatureInfo(xml_node<> * lvl_node, Creature * temp_creature){
         if (!value.compare("name")){temp_creature->name = lvl_node->value();}
         if (!value.compare("description")){temp_creature->description = lvl_node->value();}
         if (!value.compare("status")){temp_creature->status = lvl_node->value();}
-        if (!value.compare("vulnerablity")){temp_creature->Setvulnerabilities(lvl_node->value());}
-        if (!value.compare("attack")){temp_creature->has_attack = true;}
+        if (!value.compare("vulnerability")){temp_creature->Setvulnerabilities(lvl_node->value());}
+        if (!value.compare("attack")){temp_creature->has_attack = true; temp_creature->Setcondition(getTrigger(lvl_node));}
         if(!value.compare("trigger")){temp_creature->Settriggers(getTrigger(lvl_node));}
         lvl_node = lvl_node->next_sibling();
     }

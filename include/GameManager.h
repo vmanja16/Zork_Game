@@ -45,6 +45,7 @@ class GameManager
         void put(std::vector<std::string> cmd_list);
         void parseAction(std::string action);
         void printInventory();
+        bool checkCondition(Trigger trig);
         bool game_exit;
         std::list<Room> rooms; //!< Member variable "rooms"
         Room * current_room;
