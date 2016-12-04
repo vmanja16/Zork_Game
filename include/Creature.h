@@ -20,7 +20,7 @@ class Creature : public GameObject
         std::list<std::string> Getattack_actions() { return attack_actions; }
         void Setattack_actions(std::string val) { attack_actions.push_back(val); }
         std::list<std::string> Getattack_prints() { return attack_prints; }
-        void Setattack_prints(std::string val) { attack_prints.push_back(val); }
+        void Setattack_prints(std::string val) { attack_prints.push_back(val);}
         Room * Getowner(){return owner;}
         void Setowner(Room * val){owner = val;}
         bool has_attack;

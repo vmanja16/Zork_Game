@@ -8,6 +8,10 @@
 #include <algorithm>
 #include <map>
 #include <vector>
+#include "string.h"
+#include <vector>
+#include <string>
+#include <sstream>
 class GameManager
 {
     public:
@@ -46,6 +50,9 @@ class GameManager
         void parseAction(std::string action);
         void printInventory();
         bool checkCondition(Trigger trig);
+        bool checkTriggers(std::string cmd);
+        bool checkTrigger(std::string cmd, Trigger trig);
+        void executeTrigger(Trigger trigger);
         bool game_exit;
         std::list<Room> rooms; //!< Member variable "rooms"
         Room * current_room;
