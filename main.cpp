@@ -191,6 +191,10 @@ int main(int argc, const char * argv[])
     game_manager.Setcontainer_map(container_map);
     game_manager.Setcreature_instances(creatures);
     game_manager.Setcreature_map(creature_map);
+
+    //game_manager.print_rooms();
+    //game_manager.print_container_instances();
+    //game_manager.print_item_instances();
     game_manager.start();
     return 0;
 }

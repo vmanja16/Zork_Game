@@ -1,0 +1,107 @@
+# depslib dependency file v1.0
+1480891600 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\main.cpp
+	<iostream>
+	<string>
+	<string.h>
+	<list>
+	<map>
+	<fstream>
+	<streambuf>
+	"rapidxml.hpp"
+	"rapidxml_print.hpp"
+	"rapidxml_utils.hpp"
+	"Room.h"
+	"GameManager.h"
+	"Item.h"
+	"Creature.h"
+	"Trigger.h"
+
+1242197178 c:\users\vikram\documents\semester6\cpp_test_308_parser\rapidxml.hpp
+	<cstdlib>
+	<cassert>
+	<new>
+	<exception>
+
+1479337124 c:\users\vikram\documents\semester6\cpp_test_308_parser\rapidxml_print.hpp
+	"rapidxml.hpp"
+	<ostream>
+	<iterator>
+
+1479337124 c:\users\vikram\documents\semester6\cpp_test_308_parser\rapidxml_utils.hpp
+	"rapidxml.hpp"
+	<vector>
+	<string>
+	<fstream>
+	<stdexcept>
+
+1480310333 c:\users\vikram\documents\semester6\cpp_test_308_parser\include\room.h
+	<iostream>
+	<string>
+	<map>
+	<list>
+	"GameObject.h"
+
+1479705030 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\src\room.cpp
+	"Room.h"
+	<map>
+	<string>
+
+1480890972 c:\users\vikram\documents\semester6\cpp_test_308_parser\include\gamemanager.h
+	<list>
+	"Room.h"
+	"Item.h"
+	"Creature.h"
+	"Container.h"
+	<algorithm>
+	<map>
+	<vector>
+	"string.h"
+	<vector>
+	<string>
+	<sstream>
+
+1480889056 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\src\gamemanager.cpp
+	"GameManager.h"
+
+1480485102 c:\users\vikram\documents\semester6\cpp_test_308_parser\include\gameobject.h
+	<string>
+	"Trigger.h"
+	<list>
+
+1480485017 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\src\gameobject.cpp
+	"GameObject.h"
+
+1480563045 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\src\item.cpp
+	"Item.h"
+
+1480842592 c:\users\vikram\documents\semester6\cpp_test_308_parser\include\item.h
+	<GameObject.h>
+	<list>
+	<string>
+
+1480392742 c:\users\vikram\documents\semester6\cpp_test_308_parser\include\container.h
+	<list>
+	<GameObject.h>
+	"Room.h"
+
+1480455373 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\src\container.cpp
+	"Container.h"
+
+1480563134 c:\users\vikram\documents\semester6\cpp_test_308_parser\include\creature.h
+	<GameObject.h>
+	<list>
+	"Room.h"
+	"Item.h"
+	"Trigger.h"
+
+1480310171 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\src\creature.cpp
+	"Creature.h"
+
+1480560901 c:\users\vikram\documents\semester6\cpp_test_308_parser\include\trigger.h
+	<list>
+	<string>
+	<iostream>
+
+1480482721 source:c:\users\vikram\documents\semester6\cpp_test_308_parser\src\trigger.cpp
+	"Trigger.h"
+

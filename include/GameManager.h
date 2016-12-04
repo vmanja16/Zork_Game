@@ -54,6 +54,8 @@ class GameManager
         bool checkTrigger(std::string cmd, Trigger trig);
         void executeTrigger(Trigger trigger);
         bool game_exit;
+        bool game_over;
+        void print_container_instances();
         std::list<Room> rooms; //!< Member variable "rooms"
         Room * current_room;
         std::list<std::string> commands;
