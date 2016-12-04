@@ -3,6 +3,7 @@
 
 #include <GameObject.h>
 #include <list>
+#include <string>
 
 
 class Item : public GameObject

@@ -6,7 +6,6 @@
 #include <fstream>
 #include <streambuf>
 #include "rapidxml.hpp"
-//#include "rapidxml_iterators.hpp"
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
 #include "Room.h"
@@ -15,10 +14,7 @@
 #include "Creature.h"
 #include "Trigger.h"
 using namespace rapidxml;
-//std::string file_name = "itemsample.xml";
-//std::string file_name = "roomsample.xml";
-std::string file_name = "sample.txt.xml";
-//std::string file_name = "modified_sample.xml";
+
 Trigger getTrigger(xml_node<> * lvl_node){
     xml_node<> * node = lvl_node->first_node(), * node_2;
     Trigger new_trigger = Trigger();
@@ -121,8 +117,9 @@ void getCreatureInfo(xml_node<> * lvl_node, Creature * temp_creature){
         lvl_node = lvl_node->next_sibling();
     }
 }
-int main()
+int main(int argc, const char * argv[])
 {
+    if(argc !=2){std::cout << "Error: Need map xml file input" << std::endl; return 1;}
     xml_document<> doc;
     xml_node<> * mapNode;
     std::list<Room> rooms;
@@ -133,7 +130,7 @@ int main()
     std::map<std::string,Container> container_map;
     std::map<std::string,Creature> creature_map;
     std::string name;
-    std::ifstream t(file_name.c_str());
+    std::ifstream t(argv[1]);
     std::string strr((std::istreambuf_iterator<char>(t)),
                  std::istreambuf_iterator<char>());
     char  str[strr.length()];
